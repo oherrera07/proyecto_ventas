@@ -5,34 +5,22 @@ const auth = require('../middleware/auth');
 const Sale = require('../models/Sale');
 const Vendor = require('../models/Vendor');
 
-
 // POST /api/reports/weekly { startDate: 'YYYY-MM-DD', endDate: 'YYYY-MM-DD' }
 router.post('/weekly', auth, async (req, res) => {
     try {
         const { startDate, endDate } = req.body;
         if (!startDate || !endDate) return res.status(400).json({ message: 'startDate y endDate requeridos' });
 
-        const rows = await Sale.findAll({
+        const sales = await Sale.findAll({
             where: { date: { [Op.between]: [startDate, endDate] } },
             include: [{ model: Vendor }]
         });
 
-        // Estructura final:
-        // [
-        //   {
-        //     vendor: 'Juan',
-        //     items: [
-        //       { description: 'Producto A', quantity: 5, price_per_unit: 10, money_received: 50 },
-        //       { description: 'Producto B', quantity: 2, price_per_unit: 20, money_received: 40 }
-        //     ]
-        //   }
-        // ]
-
+        // Agrupar ventas por vendedor
         const map = {};
 
-        rows.forEach(sale => {
+        sales.forEach(sale => {
             const vid = sale.vendor_id;
-
             if (!map[vid]) {
                 map[vid] = {
                     vendor: sale.Vendor ? sale.Vendor.name : 'Desconocido',
@@ -41,20 +29,26 @@ router.post('/weekly', auth, async (req, res) => {
             }
 
             map[vid].items.push({
-                description: sale.description || 'Sin descripción',
-                quantity: sale.quantity,
+                quantity_delivered: parseInt(sale.quantity_delivered),
+                leftovers: parseInt(sale.leftovers),
+                quantity_sold: parseInt(sale.quantity_sold),
                 price_per_unit: parseFloat(sale.price_per_unit),
-                money_received: parseFloat(sale.money_received)
+                total_sold: parseFloat(sale.total_sold),
+                bills: parseFloat(sale.bills),
+                coins: parseFloat(sale.coins),
+                expenses: parseFloat(sale.expenses),
+                total_to_deliver: parseFloat(sale.total_to_deliver),
+                total_delivered: parseFloat(sale.total_delivered),
+                remaining_balance: parseFloat(sale.remaining_balance)
             });
         });
 
         res.json(Object.values(map));
 
     } catch (e) {
+        console.error(e);
         res.status(500).json({ message: e.message });
     }
 });
-
-
 
 module.exports = router;
