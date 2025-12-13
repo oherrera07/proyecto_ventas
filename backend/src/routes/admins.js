@@ -26,19 +26,34 @@ router.get('/vendors', auth, async (req, res) => {
 // Registrar venta (admin registra ventas por vendedor)
 router.post('/sales', auth, async (req, res) => {
   try {
-    const { vendor_id, date, quantity, price_per_unit, description, money_received } = req.body;
+    const { vendor_id, date, quantity_delivered, leftovers,
+      quantity_sold, price_per_unit, total_sold,
+      bills, coins, expenses, total_to_deliver,
+      total_delivered, remaining_balance } = req.body;
 
-    if (!vendor_id || !date || quantity == null || price_per_unit == null || money_received == null) {
+    if (!vendor_id || !date || quantity_delivered == null
+      || price_per_unit == null || leftovers == null
+      || quantity_sold == null || total_sold == null
+      || bills == null || coins == null || expenses == null
+      || total_to_deliver == null || total_delivered == null
+    ) {
       return res.status(400).json({ message: 'Campos faltantes' });
     }
 
     const sale = await Sale.create({
       vendor_id,
       date,
-      quantity,
+      quantity_delivered,
+      leftovers,
       price_per_unit,
-      description,
-      money_received,
+      total_sold,
+      bills, 
+      coins, 
+      expenses, 
+      total_to_deliver,
+      total_delivered, 
+      remaining_balance,
+      
       created_by: req.user.id
     });
 
