@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import Header from '../components/Header';
 
 
 export default function AdminDashboard() {
@@ -7,6 +8,7 @@ export default function AdminDashboard() {
     function logout() { localStorage.removeItem('token'); nav('/login'); }
     return (
         <div className="p-8 max-w-3xl mx-auto">
+            <Header /> {/* Aquí van los logos */}
             <div className='bg-white shadow-lg p-6 rounded-xl border border-gray-200'>
                 <h1 className="text-2xl mb-4">Panel Administrador</h1>
                 <div className="space-x-2">

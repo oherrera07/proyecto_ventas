@@ -45,15 +45,16 @@ router.post('/sales', auth, async (req, res) => {
       date,
       quantity_delivered,
       leftovers,
+      quantity_sold,
       price_per_unit,
       total_sold,
-      bills, 
-      coins, 
-      expenses, 
+      bills,
+      coins,
+      expenses,
       total_to_deliver,
-      total_delivered, 
+      total_delivered,
       remaining_balance,
-      
+
       created_by: req.user.id
     });
 

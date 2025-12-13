@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { listVendors, createSale } from '../services/api'
 import { useNavigate } from 'react-router-dom'
-//import DashboardButton from "../components/DashboardButton";
-
+import Header from '../components/Header';
 
 export default function RecordSale() {
     const [vendors, setVendors] = useState([])
@@ -13,202 +12,167 @@ export default function RecordSale() {
     const [quantity2, setQuantity2] = useState('')
     const [price, setPrice] = useState('')
     const [total1, setTotal1] = useState('')
+    const [expenses, setExpenses] = useState('')
     const [bills, setBills] = useState('')
     const [coins, setCoins] = useState('')
-    const [expenses, setExpenses] = useState('')
     const [total2, setTotal2] = useState('')
     const [total3, setTotal3] = useState('')
     const [balance, setBalance] = useState('')
-
     const [msg, setMsg] = useState('')
-
 
     const nav = useNavigate()
 
-
-    useEffect(() => { (async () => { try { const v = await listVendors(); setVendors(v); } catch (e) { setMsg('Error cargando vendedores'); } })(); }, []);
+    useEffect(() => {
+        listVendors().then(setVendors).catch(() => setMsg('Error cargando vendedores'))
+    }, [])
 
     useEffect(() => {
-        const q1 = parseInt(quantity1) || 0
-        const l1 = parseInt(leftovers) || 0
-        setQuantity2(q1 - l1)
+        setQuantity2((parseInt(quantity1) || 0) - (parseInt(leftovers) || 0))
     }, [quantity1, leftovers])
 
     useEffect(() => {
-        const qs = parseInt(quantity2) || 0
-        const up = parseFloat(price) || 0
-        setTotal1(qs * up)
+        setTotal1((parseInt(quantity2) || 0) * (parseFloat(price) || 0))
     }, [quantity2, price])
 
-    
-    //total to deliver
     useEffect(() => {
-        const t1 = parseInt(total1) || 0
-        const exp = parseInt(expenses) || 0
-        setTotal2(t1 - exp)
+        setTotal2((parseFloat(total1) || 0) - (parseFloat(expenses) || 0))
     }, [total1, expenses])
 
-    //total delivered
     useEffect(() => {
-        const b = parseInt(bills) || 0
-        const c= parseInt(coins) || 0
-        setTotal3(b + c)
+        setTotal3((parseFloat(bills) || 0) + (parseFloat(coins) || 0))
     }, [bills, coins])
 
-    //balance
     useEffect(() => {
-        const ttd = parseInt(total2) || 0
-        const td= parseInt(total3) || 0
-        setBalance(ttd - td)
+        setBalance((parseFloat(total2) || 0) - (parseFloat(total3) || 0))
     }, [total2, total3])
 
-
-
     async function submit(e) {
-        e.preventDefault();
+        e.preventDefault()
         try {
             await createSale({
                 vendor_id: vendorId,
                 date,
-                quantity_delivered: parseInt(quantity1),
-                leftovers: parseInt(leftovers),
-                quantity_sold: parseInt(quantity2),
-                price_per_unit: parseFloat(price),
-                total_sold: parseFloat(total1),
-                bills: parseFloat(bills),
-                coins: parseFloat(coins),
-                expenses: parseFloat(expenses),
-                total_to_deliver: parseFloat(total2),
-                total_delivered: parseFloat(total3),
-                remaining_balance: parseFloat(balance)
-
-            });
-
-            setMsg('Venta registrada');
-            setQuantity1('');
-            setLeftovers('');
-            setQuantity2('');
-            setPrice('');
-            setTotal1('');
-            setCoins('');
-            setBills('');
-            setExpenses('');
-            setTotal2('');
-            setTotal3('');
-            setBalance('');
-
-
-        } catch (e) { setMsg('Error: ' + (e?.response?.data?.message || e.message)); }
+                quantity_delivered: quantity1,
+                leftovers,
+                quantity_sold: quantity2,
+                price_per_unit: price,
+                total_sold: total1,
+                expenses,
+                bills,
+                coins,
+                total_to_deliver: total2,
+                total_delivered: total3,
+                remaining_balance: balance
+            })
+            setMsg('Venta registrada correctamente')
+        } catch (e) {
+            setMsg('Error al registrar venta')
+        }
     }
 
+    const Field = ({ label, children }) => (
+        <div className="flex flex-col gap-1">
+            <label className="text-sm font-semibold">{label}</label>
+            {children}
+        </div>
+    )
+
+    const inputClass =
+        'p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500'
 
     return (
-        <div className="p-8 max-w-md mx-auto">
+        <div className="p-8 max-w-4xl mx-auto">
+            <Header /> {/* Aquí van los logos */}
+            <div className="bg-white p-6 rounded-xl shadow border">
+                <h1 className="text-xl font-bold mb-4">Registrar Venta</h1>
 
-            <div className='bg-white shadow-lg p-6 rounded-xl border border-gray-200'>
-                <h1 className="text-xl mb-4">Registrar Venta</h1>
-                <form onSubmit={submit} className="space-y-3">
-                    <select className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm" value={vendorId} onChange={e => setVendorId(e.target.value)}>
-                        <option value="">-- Selecciona vendedor --</option>
-                        {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
-                    </select>
-                    <input className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        type="date"
-                        value={date}
-                        onChange={e => setDate(e.target.value)} />
-                    <input
-                        type="number"
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        placeholder="Cantidad Entregada"
-                        value={quantity1}
-                        onChange={(e) => setQuantity1(e.target.value)}
-                    />
-                    <input
-                        type="number"
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        placeholder="Sobrantes"
-                        value={leftovers}
-                        onChange={(e) => setLeftovers(e.target.value)}
-                    />
+                <form onSubmit={submit} className="grid grid-cols-2 gap-6">
 
-                    <input
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        placeholder="Cantidad Vendida"
-                        value={quantity2}
-                        readOnly
-                    />
+                    {/* ================= COLUMNA IZQUIERDA ================= */}
+                    <div className="flex flex-col gap-4">
 
-                    <input
-                        type="number"
-                        step="0.01"
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        placeholder="Precio Unitario"
-                        value={price}
-                        onChange={(e) => setPrice(e.target.value)}
-                    />
+                        <Field label="Vendedor">
+                            <select className={inputClass} value={vendorId} onChange={e => setVendorId(e.target.value)}>
+                                <option value="">Selecciona vendedor</option>
+                                {vendors.map(v => (
+                                    <option key={v.id} value={v.id}>{v.name}</option>
+                                ))}
+                            </select>
+                        </Field>
 
-                    <input
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        placeholder="Total Ventas"
-                        value={total1}
-                        readOnly
-                    />
+                        <Field label="Fecha">
+                            <input type="date" className={inputClass} value={date} onChange={e => setDate(e.target.value)} />
+                        </Field>
 
-                    <input
-                        type="number"
-                        step="0.01"
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        placeholder="Billetes"
-                        value={bills}
-                        onChange={(e) => setBills(e.target.value)}
-                    />
+                        <Field label="Cantidad Entregada">
+                            <input type="number" className={inputClass} value={quantity1} onChange={e => setQuantity1(e.target.value)} />
+                        </Field>
 
-                    <input
-                        type="number"
-                        step="0.01"
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        placeholder="Monedas"
-                        value={coins}
-                        onChange={(e) => setCoins(e.target.value)}
-                    />
+                        <Field label="Sobrantes">
+                            <input type="number" className={inputClass} value={leftovers} onChange={e => setLeftovers(e.target.value)} />
+                        </Field>
 
-                    <input
-                        type="number"
-                        step="0.01"
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        placeholder="Gastos"
-                        value={expenses}
-                        onChange={(e) => setExpenses(e.target.value)}
-                    />
+                        <Field label="Cantidad Vendida (calculada)">
+                            <input className={inputClass} value={quantity2} readOnly />
+                        </Field>
 
-                    <input
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        placeholder="Total a Recibir"
-                        value={total2}
-                        readOnly
-                    />
+                        <Field label="Precio Unitario">
+                            <input type="number" step="0.01" className={inputClass} value={price} onChange={e => setPrice(e.target.value)} />
+                        </Field>
 
-                    <input
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        placeholder="Total a Recibir"
-                        value={total3}
-                        readOnly
-                    />
+                        <Field label="Total Ventas (calculado)">
+                            <input className={inputClass} value={total1} readOnly />
+                        </Field>
 
-                    <input
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                        placeholder="Saldo Pendiente"
-                        value={balance}
-                        readOnly
-                    />
-
-
-                    <div className="flex space-x-2">
-                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold shadow">Guardar</button>
-                        <button type="button" onClick={() => nav('/')} className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold shadow">Volver</button>
                     </div>
+
+                    {/* ================= COLUMNA DERECHA ================= */}
+                    <div className="flex flex-col gap-4">
+
+                        <Field label="Gastos">
+                            <input type="number" step="0.01" className={inputClass} value={expenses} onChange={e => setExpenses(e.target.value)} />
+                        </Field>
+
+                        <Field label="Total a Recibir (calculado)">
+                            <input className={inputClass} value={total2} readOnly />
+                        </Field>
+
+                        <Field label="Billetes">
+                            <input type="number" step="0.01" className={inputClass} value={bills} onChange={e => setBills(e.target.value)} />
+                        </Field>
+
+                        <Field label="Monedas">
+                            <input type="number" step="0.01" className={inputClass} value={coins} onChange={e => setCoins(e.target.value)} />
+                        </Field>
+
+                        <Field label="Total Entregado (calculado)">
+                            <input className={inputClass} value={total3} readOnly />
+                        </Field>
+
+                        <Field label="Saldo Pendiente (calculado)">
+                            <input className={inputClass} value={balance} readOnly />
+                        </Field>
+
+                    </div>
+
+                    {/* ================= BOTONES ================= */}
+                    <div className="col-span-2 flex justify-center gap-4 mt-6">
+                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold">
+                            Guardar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => nav('/')}
+                            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-semibold"
+                        >
+                            Volver
+                        </button>
+                    </div>
+
                 </form>
-                {msg && <p className="mt-2">{msg}</p>}
+
+
+                {msg && <p className="mt-3 font-semibold">{msg}</p>}
             </div>
         </div>
     )

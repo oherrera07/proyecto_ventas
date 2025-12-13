@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { createVendor } from '../services/api'
 import { useNavigate } from 'react-router-dom'
+import Header from '../components/Header';
 
 
 export default function RegisterVendor() {
@@ -22,6 +23,7 @@ export default function RegisterVendor() {
 
     return (
         <div className="p-8 max-w-md mx-auto">
+            <Header /> {/* Aquí van los logos */}
             <div className='bg-white shadow-lg p-6 rounded-xl border border-gray-200'>
             <h1 className="text-xl mb-4">Registrar Vendedor</h1>
             <form onSubmit={submit} className="space-y-3">

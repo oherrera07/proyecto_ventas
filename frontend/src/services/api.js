@@ -32,7 +32,13 @@ return res.data;
 }
 
 
-export async function weeklyReport(startDate, endDate){
-const res = await axios.post(`${API}/reports/weekly`, { startDate, endDate }, { headers: authHeaders() });
-return res.data;
+export async function weeklyReport(startDate, endDate, vendor_id) {
+    const res = await axios.post(
+        `${API}/reports/weekly`,
+        { startDate, endDate, vendor_id }, // enviamos el ID opcional
+        { headers: authHeaders() }
+    );
+    return res.data;
 }
+
+
