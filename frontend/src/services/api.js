@@ -1,5 +1,5 @@
 import axios from 'axios';
-const API = (import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : 'https://backendhdh.onrender.com';
+const API = (import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : 'https://backendhdh.onrender.com/api';
 
 
 export async function login(username, password){
