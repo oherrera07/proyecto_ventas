@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Header() {
+function Header() {
     return (
         <header className="flex justify-between items-center p-4 bg-white shadow-md border-b border-gray-200 mb-6 flex-wrap">
             {/* Logo izquierdo */}
@@ -11,3 +11,5 @@ export default function Header() {
         </header>
     );
 }
+
+export default React.memo(Header)
